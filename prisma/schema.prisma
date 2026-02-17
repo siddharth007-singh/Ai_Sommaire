@@ -17,10 +17,10 @@ model User {
   id          String        @id @default(uuid())
   email       String        @unique
   fullName    String?
-  customerId  String?       // Stripe customer id
-  priceId     String?       // Current plan price id
+  customerId  String?   
+  priceId     String?  
   status      UserStatus    @default(INACTIVE)
-  credits     Int          @default(4)   // ✅ ADD THIS
+  credits     Int          @default(4)
   plan        String       @default("FREE") // FREE | BASIC | PRO
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
