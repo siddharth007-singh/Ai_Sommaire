@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "credits" INTEGER NOT NULL DEFAULT 4,
+ADD COLUMN     "plan" TEXT NOT NULL DEFAULT 'FREE';

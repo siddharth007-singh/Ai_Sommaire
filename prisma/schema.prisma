@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  email       String        @unique
+  fullName    String?
+  customerId  String?       // Stripe customer id
+  priceId     String?       // Current plan price id
+  status      UserStatus    @default(INACTIVE)
+  credits     Int          @default(4)   // ✅ ADD THIS
+  plan        String       @default("FREE") // FREE | BASIC | PRO
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  pdfSummaries PdfSummary[]
+  payments     Payment[]
+
+  @@map("users")
+}
+
+model PdfSummary {
+  id             String   @id @default(uuid())
+  userId         String
+  originalFileUrl String
+  summaryText    String
+  status         SummaryStatus @default(PENDING)
+  title          String?
+  fileName       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("pdf_summaries")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  amount          Int           // in paise (₹) or cents
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?       @unique
+  priceId         String?
+  userEmail       String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user User @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+
+  @@index([userEmail])
+  @@map("payments")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SummaryStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
