@@ -35,7 +35,6 @@ const UploadFormInput = ({loading, onSubmit}:Props) => {
 
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* File input */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">
                                     Select PDF file
