@@ -21,13 +21,11 @@ export const metadata: Metadata = {
   description: "Generate concise summaries of articles, documents, and web pages using AI technology.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  await ensureUserInDb();
 
   return (
     <ClerkProvider>
