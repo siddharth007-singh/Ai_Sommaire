@@ -8,9 +8,7 @@ import { generatePdfSummary, getMyCredits, storePdfSummary } from '@/app/actions
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
 
-type Props = {}
-
-const UploadForm = (props: Props) => {
+const UploadForm = () => {
   const [loading, setLoading] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
   const [plan, setPlan] = useState<"FREE" | "BASIC" | "PRO" | null>(null);
@@ -21,14 +19,14 @@ const UploadForm = (props: Props) => {
       const data = await getMyCredits();
       if (data) {
         setCredits(data.credits);
-        setPlan(data.plan as any);
+        setPlan(data.plan);
       }
     })();
   }, []);
 
   if (!isLoaded) return <div>Loading...</div>;
 
-  const handleUpload = async(file:File)=>{
+  const handleUpload = async (file: File) => {
     setLoading(true);
 
     try {
@@ -61,15 +59,20 @@ const UploadForm = (props: Props) => {
         setCredits((prev) => (prev ? prev - 1 : 0));
       }
 
-    } catch (error:any) {
-      if (error.message?.includes("No credits")) {
-        toast.error("Your credits are over. Upgrade to Pro 🚀");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message.includes("No credits")) {
+          toast.error("Your credits are over. Upgrade to Pro 🚀");
+        } else {
+          toast.error(error.message || "Something went wrong. Try again!");
+        }
       } else {
         toast.error("Something went wrong. Try again!");
       }
     } finally {
       setLoading(false);
     }
+
   };
 
 
@@ -87,7 +90,7 @@ const UploadForm = (props: Props) => {
       {/* Banner + Upload UI */}
       {plan !== "PRO" && credits === 0 ? (
         <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-700 text-center">
-          ⚠️ Your free credits are over.  
+          ⚠️ Your free credits are over.
           <Link href="/pricing" className="ml-2 underline font-semibold">
             Upgrade to Pro 🚀
           </Link>

@@ -1,6 +1,7 @@
 "use server";
 
 import cloudinary from "@/lib/cloudinary";
+import type { UploadApiResponse, UploadApiErrorResponse } from "cloudinary";
 import { generateSummaryFromGemini } from "@/lib/geminiai";
 import { generatePdfSummaryWithLangChain } from "@/lib/langchain";
 import { prisma } from "@/lib/prisma";
@@ -47,7 +48,6 @@ export async function ensureUserInDb() {
 }
 
 export async function generatePdfSummary(formData: FormData) {
-
   const { userId } = await auth();
   if (!userId) {
     throw new Error("Unauthorized");
@@ -62,41 +62,32 @@ export async function generatePdfSummary(formData: FormData) {
     throw new Error("User not found");
   }
 
-  // ❌ No credits left
   if (user.plan !== "PRO" && user.credits <= 0) {
     throw new Error("No credits left. Please upgrade to Pro.");
   }
 
-  const file = formData.get('file') as File;
-
+  const file = formData.get("file") as File | null;
   if (!file) throw new Error("No file uploaded");
 
-  //Convert that file into buffer
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  //Uploade it to clounadry
-  const uploadResult = await new Promise<any>((res, rej) => {
+  // ✅ Properly typed Cloudinary upload
+  const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
     cloudinary.uploader.upload_stream(
       { resource_type: "raw" },
-      (err, result) => {
-        if (err) rej(err);
-        else res(result);
+      (error?: UploadApiErrorResponse, result?: UploadApiResponse) => {
+        if (error) reject(error);
+        else if (result) resolve(result);
+        else reject(new Error("Cloudinary upload failed"));
       }
     ).end(buffer);
-  })
+  });
 
   const fileUrl = uploadResult.secure_url;
 
-  // langchain summary
   const pdfText = await generatePdfSummaryWithLangChain(fileUrl);
-
-  console.log("Pdf Text:", pdfText);
-
-  // summarize with gemini
   const summary = await generateSummaryFromGemini(pdfText);
-
-  console.log("📄 SUMMARY:", summary);
 
   return {
     success: true,
@@ -265,7 +256,10 @@ export async function deleteSummary(id: string) {
   return { success: true };
 }
 
-export async function getMyCredits() {
+export async function getMyCredits(): Promise<{
+  credits: number | null;
+  plan: "FREE" | "BASIC" | "PRO" | null;
+} | null> {
   const { userId } = await auth();
   if (!userId) return null;
 
@@ -274,6 +268,10 @@ export async function getMyCredits() {
     select: { credits: true, plan: true },
   });
 
-  return user;
-}
+  if (!user) return null;
 
+  return {
+    credits: user.credits,
+    plan: user.plan as "FREE" | "BASIC" | "PRO",
+  };
+}

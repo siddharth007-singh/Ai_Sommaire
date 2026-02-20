@@ -1,12 +1,9 @@
 import { Badge } from '@/components/ui/badge'
 import UploadForm from '@/components/upload/upload-form'
 import { Sparkles } from 'lucide-react'
-import React from 'react'
 
 
-type Props = {}
-
-const UploadePage = (props: Props) => {
+const UploadePage = () => {
   return (
     <section className='min-h-screen'>
         <div className='mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-4'>
@@ -15,7 +12,7 @@ const UploadePage = (props: Props) => {
                     <Sparkles className="h-6 w-6 mr-2 text-rose-600 animate-pulse"/>
                     <p>Powered by AI</p>
                 </Badge>
-                <h1 className='text-5xl font-extrabold tracking-tight text-gray-900 sm:text-4xl'>Start Uploading Your PDF's</h1>
+                <h1 className='text-5xl font-extrabold tracking-tight text-gray-900 sm:text-4xl'>Start Uploading Your PDF</h1>
                 <p className=''>Uploade your PDF and let AI do the magic! ✨</p>
 
                 <UploadForm/>
