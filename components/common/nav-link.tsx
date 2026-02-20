@@ -1,8 +1,6 @@
 import React from 'react'
 
-type Props = {}
-
-const NavLink = (props: Props) => {
+const NavLink = () => {
   return (
     <div>NavLink</div>
   )

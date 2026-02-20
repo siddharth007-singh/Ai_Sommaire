@@ -3,15 +3,9 @@
 import { FileTextIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Badge } from '../ui/badge'
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import { ensureUserInDb } from '@/app/actions/upload-action'
 
-type Props = {}
-
-const Header =(props: Props) => {
-
-    // await ensureUserInDb();
+const Header =() => {
 
     const isLoggedIn = false; // Replace with actual authentication logic
 
