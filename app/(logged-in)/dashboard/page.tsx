@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, Plus, FileText } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = "force-dynamic";
+
 const DashboardPage = async () => {
   const res = await getMySummary();
 const summaries = res.success ? res.data : [];

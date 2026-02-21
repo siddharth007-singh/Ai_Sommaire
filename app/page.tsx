@@ -1,5 +1,3 @@
-"use client"
-
 import DemoSection from "@/components/home/demo-section";
 import { Footer } from "@/components/home/footer";
 import HeroSection from "@/components/home/hero-section";
