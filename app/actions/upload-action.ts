@@ -16,35 +16,44 @@ type StorePdfSummaryInput = {
 };
 
 export async function ensureUserInDb() {
-  const { userId } = await auth();
-  const clerkUser = await currentUser();
+  try {
+    const { userId } = await auth();
+    if (!userId) return null;
 
-  if (!userId || !clerkUser) {
-    return null;
-  }
+    const clerkUser = await currentUser();
+    if (!clerkUser) return null;
 
-  let user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
+    const primaryEmail = clerkUser.emailAddresses?.[0]?.emailAddress;
 
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        id: userId,
-        email: clerkUser.emailAddresses[0].emailAddress,
-        fullName: clerkUser.fullName ?? "",
-        status: "ACTIVE",
-        credits: 4,
-        plan: "FREE",
-      },
+    if (!primaryEmail) {
+      console.warn("⚠️ No email found for user:", userId);
+      return null;
+    }
+
+    let user = await prisma.user.findUnique({
+      where: { id: userId },
     });
 
-    console.log("✅ New user created in DB:", user.id);
-  } else {
-    console.log("ℹ️ User already exists in DB:", user.id);
-  }
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          id: userId,
+          email: primaryEmail,
+          fullName: clerkUser.fullName ?? "",
+          status: "ACTIVE",
+          credits: 4,
+          plan: "FREE",
+        },
+      });
 
-  return user;
+      console.log("✅ New user created in DB:", user.id);
+    }
+
+    return user;
+  } catch (error) {
+    console.error("❌ ensureUserInDb failed:", error);
+    return null; // 👈 very important for prod stability
+  }
 }
 
 export async function generatePdfSummary(formData: FormData) {

@@ -5,6 +5,10 @@ import { HowItWorks } from "@/components/home/how-it-works";
 import Pricing from "@/components/home/pricing";
 import { ensureUserInDb } from "./actions/upload-action";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+
 export default async function Home() {
   
   await ensureUserInDb();
